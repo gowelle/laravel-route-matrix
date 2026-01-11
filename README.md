@@ -419,6 +419,120 @@ Helper methods:
 - `getDistanceInMiles()` - Get distance in miles
 - `getFormattedDuration()` - Get human-readable duration
 
+### Real-World Example: Courier Pickup & Delivery
+
+A courier needs to pick up packages from multiple stores and deliver to customers (some packages share the same destination):
+
+```php
+use Gowelle\LaravelRouteMatrix\Facades\GoogleRoutes;
+
+// Courier's current location (Dar es Salaam - Posta)
+$courierLocation = ['lat' => -6.8160, 'lng' => 39.2803];
+
+// Stores to pickup from
+$stores = [
+    ['id' => 'store_1', 'name' => 'Kariakoo Market', 'lat' => -6.8235, 'lng' => 39.2695],
+    ['id' => 'store_2', 'name' => 'Mlimani City Mall', 'lat' => -6.7724, 'lng' => 39.2083],
+    ['id' => 'store_3', 'name' => 'Slipway Shopping', 'lat' => -6.7488, 'lng' => 39.2656],
+];
+
+// Packages with destinations (some share same customer)
+$packages = [
+    ['id' => 'pkg_1', 'store_id' => 'store_1', 'customer' => 'Masaki Customer', 'lat' => -6.7567, 'lng' => 39.2772],
+    ['id' => 'pkg_2', 'store_id' => 'store_2', 'customer' => 'Masaki Customer', 'lat' => -6.7567, 'lng' => 39.2772],
+    ['id' => 'pkg_3', 'store_id' => 'store_2', 'customer' => 'Mikocheni Customer', 'lat' => -6.7651, 'lng' => 39.2451],
+    ['id' => 'pkg_4', 'store_id' => 'store_3', 'customer' => 'Kinondoni Customer', 'lat' => -6.7735, 'lng' => 39.2401],
+];
+
+// Get unique destinations (consolidate packages to same location)
+$uniqueDestinations = collect($packages)
+    ->unique(fn($pkg) => $pkg['lat'] . ',' . $pkg['lng'])
+    ->values()
+    ->all();
+
+// STEP 1: Find optimal pickup order
+$pickupRoute = GoogleRoutes::from($courierLocation);
+foreach ($stores as $store) {
+    $pickupRoute->via(['lat' => $store['lat'], 'lng' => $store['lng']]);
+}
+
+$lastStore = end($stores);
+$response = $pickupRoute
+    ->to(['lat' => $lastStore['lat'], 'lng' => $lastStore['lng']])
+    ->optimizeWaypointOrder()
+    ->driving()
+    ->withTraffic()
+    ->get();
+
+$optimizedOrder = $response->first()->optimizedIntermediateWaypointIndex ?? [];
+echo "Pickup order: " . implode(' → ', array_map(fn($i) => $stores[$i]['name'], $optimizedOrder));
+
+// STEP 2: Calculate delivery matrix from last pickup
+$deliveryMatrix = GoogleRoutes::matrix()
+    ->addOrigin(['lat' => $lastStore['lat'], 'lng' => $lastStore['lng']])
+    ->driving()
+    ->withTraffic();
+
+foreach ($uniqueDestinations as $dest) {
+    $deliveryMatrix->addDestination(['lat' => $dest['lat'], 'lng' => $dest['lng']]);
+}
+
+$matrixResponse = $deliveryMatrix->get();
+
+// Find closest delivery from last pickup
+$firstDelivery = $matrixResponse->getClosestDestination(0);
+echo "First delivery: {$uniqueDestinations[$firstDelivery->destinationIndex]['customer']}";
+echo "ETA: {$firstDelivery->getFormattedDuration()}";
+
+// STEP 3: Build full optimized route (pickups + deliveries)
+$allStops = array_merge(
+    array_map(fn($s) => ['lat' => $s['lat'], 'lng' => $s['lng'], 'type' => 'pickup', 'name' => $s['name']], $stores),
+    array_map(fn($d) => ['lat' => $d['lat'], 'lng' => $d['lng'], 'type' => 'delivery', 'name' => $d['customer']], $uniqueDestinations)
+);
+
+$fullRoute = GoogleRoutes::from($courierLocation);
+foreach ($allStops as $stop) {
+    $fullRoute->via(['lat' => $stop['lat'], 'lng' => $stop['lng']]);
+}
+
+$optimizedResponse = $fullRoute
+    ->to($courierLocation) // Return to base
+    ->optimizeWaypointOrder()
+    ->driving()
+    ->withTraffic()
+    ->get();
+
+$route = $optimizedResponse->first();
+echo "Total distance: {$route->getDistanceInKilometers()} km";
+echo "Total time: {$route->getFormattedDuration()}";
+
+// Display optimized route
+$finalOrder = $route->optimizedIntermediateWaypointIndex ?? [];
+foreach ($finalOrder as $index => $stopIndex) {
+    $stop = $allStops[$stopIndex];
+    $icon = $stop['type'] === 'pickup' ? '📦' : '🚚';
+    echo ($index + 1) . ". {$icon} {$stop['name']}";
+}
+```
+
+**Output:**
+```
+Pickup order: Kariakoo Market → Mlimani City Mall → Slipway Shopping
+
+First delivery: Masaki Customer
+ETA: 12 min
+
+Total distance: 32.4 km
+Total time: 1h 8m
+
+1. 📦 Kariakoo Market
+2. 📦 Mlimani City Mall
+3. 🚚 Mikocheni Customer
+4. 🚚 Kinondoni Customer  
+5. 📦 Slipway Shopping
+6. 🚚 Masaki Customer (2 packages)
+```
+
 ## Response Objects
 
 ### RoutesResponse
