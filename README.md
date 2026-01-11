@@ -71,9 +71,9 @@ GOOGLE_ROUTES_API_KEY=your-api-key-here
 ```php
 use Gowelle\LaravelRouteMatrix\Facades\GoogleRoutes;
 
-// Simple route calculation
-$response = GoogleRoutes::from(['lat' => 37.419734, 'lng' => -122.0827784])
-    ->to(['lat' => 37.417670, 'lng' => -122.079595])
+// Posta -> Mlimani City Mall
+$response = GoogleRoutes::from(['lat' => -6.8163, 'lng' => 39.2807])
+    ->to(['lat' => -6.7724, 'lng' => 39.2083])
     ->get();
 
 $route = $response->first();
@@ -89,22 +89,22 @@ echo "Duration: {$route->getFormattedDuration()}";
 ```php
 use Gowelle\LaravelRouteMatrix\Facades\GoogleRoutes;
 
-$response = GoogleRoutes::from(['lat' => 37.419734, 'lng' => -122.0827784])
-    ->to(['lat' => 37.417670, 'lng' => -122.079595])
+$response = GoogleRoutes::from(['lat' => -6.8163, 'lng' => 39.2807])
+    ->to(['lat' => -6.7724, 'lng' => 39.2083])
     ->get();
 
 // Access the first (recommended) route
 $route = $response->first();
-echo $route->distanceMeters;      // 772
-echo $route->duration;            // "165s"
-echo $route->getDurationInSeconds(); // 165
+echo $route->distanceMeters;      // 8200
+echo $route->duration;            // "900s"
+echo $route->getDurationInSeconds(); // 900
 ```
 
 ### Using Addresses
 
 ```php
-$response = GoogleRoutes::from('1600 Amphitheatre Parkway, Mountain View, CA')
-    ->to('1 Infinite Loop, Cupertino, CA')
+$response = GoogleRoutes::from('Julius Nyerere International Airport, Dar es Salaam')
+    ->to('Mlimani City Mall, Dar es Salaam')
     ->get();
 ```
 
@@ -113,18 +113,20 @@ $response = GoogleRoutes::from('1600 Amphitheatre Parkway, Mountain View, CA')
 ```php
 use Gowelle\LaravelRouteMatrix\ValueObjects\Waypoint;
 
-$response = GoogleRoutes::from(Waypoint::fromPlaceId('ChIJ2eUgeAK6j4ARbn5u_wAGqWA'))
-    ->to(Waypoint::fromAddress('Apple Park'))
+// Example with Place IDs
+$response = GoogleRoutes::from(Waypoint::fromPlaceId('ChIJ...' /* Posta */))
+    ->to(Waypoint::fromAddress('Mlimani City Mall, Dar es Salaam'))
     ->get();
 ```
 
 ### With Intermediate Waypoints
 
 ```php
-$response = GoogleRoutes::from(['lat' => 37.419734, 'lng' => -122.0827784])
-    ->via(['lat' => 37.418, 'lng' => -122.081])
-    ->via(['lat' => 37.416, 'lng' => -122.080])
-    ->to(['lat' => 37.417670, 'lng' => -122.079595])
+// Posta -> Kariakoo -> Magomeni -> Mlimani City
+$response = GoogleRoutes::from(['lat' => -6.8163, 'lng' => 39.2807])
+    ->via(['lat' => -6.8235, 'lng' => 39.2695]) // Kariakoo
+    ->via(['lat' => -6.8059, 'lng' => 39.2536]) // Magomeni
+    ->to(['lat' => -6.7724, 'lng' => 39.2083])
     ->get();
 
 // Access individual legs
@@ -307,9 +309,10 @@ use Gowelle\LaravelRouteMatrix\Enums\TravelMode;
 use Gowelle\LaravelRouteMatrix\Enums\RoutingPreference;
 use Carbon\Carbon;
 
-$response = GoogleRoutes::from(['lat' => 37.419734, 'lng' => -122.0827784])
-    ->to(['lat' => 37.417670, 'lng' => -122.079595])
-    ->via(['lat' => 37.418, 'lng' => -122.081])
+// Posta to Mlimani City with waypoints and options
+$response = GoogleRoutes::from(['lat' => -6.8163, 'lng' => 39.2807])
+    ->to(['lat' => -6.7724, 'lng' => 39.2083])
+    ->via(['lat' => -6.8235, 'lng' => 39.2695]) // Kariakoo
     ->travelMode(TravelMode::DRIVE)
     ->routingPreference(RoutingPreference::TRAFFIC_AWARE_OPTIMAL)
     ->avoidTolls()
@@ -352,10 +355,10 @@ The Route Matrix API allows you to calculate distances and travel times between 
 use Gowelle\LaravelRouteMatrix\Facades\GoogleRoutes;
 
 $response = GoogleRoutes::matrix()
-    ->addOrigin(['lat' => 35.6762, 'lng' => 139.6503]) // Your location
-    ->addDestination(['lat' => 35.6586, 'lng' => 139.7454]) // Tokyo Tower
-    ->addDestination(['lat' => 35.6895, 'lng' => 139.6917]) // Shinjuku
-    ->addDestination(['lat' => 35.7100, 'lng' => 139.8107]) // Asakusa
+    ->addOrigin(['lat' => -6.8163, 'lng' => 39.2807]) // Posta (Your location)
+    ->addDestination(['lat' => -6.8235, 'lng' => 39.2695]) // Kariakoo
+    ->addDestination(['lat' => -6.7724, 'lng' => 39.2083]) // Mlimani City
+    ->addDestination(['lat' => -6.7567, 'lng' => 39.2772]) // Masaki
     ->driving()
     ->get();
 
@@ -373,10 +376,10 @@ echo "Fastest: {$fastest->getFormattedDuration()}";
 ```php
 // Find which store/warehouse is closest to a customer
 $response = GoogleRoutes::matrix()
-    ->addOrigin(['lat' => 35.6762, 'lng' => 139.6503]) // Store A
-    ->addOrigin(['lat' => 35.6895, 'lng' => 139.6917]) // Store B
-    ->addOrigin(['lat' => 35.7100, 'lng' => 139.8107]) // Store C
-    ->addDestination(['lat' => 35.6586, 'lng' => 139.7454]) // Customer
+    ->addOrigin(['lat' => -6.8163, 'lng' => 39.2807]) // Store A (Posta)
+    ->addOrigin(['lat' => -6.8235, 'lng' => 39.2695]) // Store B (Kariakoo)
+    ->addOrigin(['lat' => -6.7724, 'lng' => 39.2083]) // Store C (Mlimani City)
+    ->addDestination(['lat' => -6.7567, 'lng' => 39.2772]) // Customer (Masaki)
     ->driving()
     ->get();
 
@@ -389,12 +392,12 @@ echo "Ship from store at origin index: {$closestStore->originIndex}";
 ```php
 $response = GoogleRoutes::matrix()
     ->origins([
-        ['lat' => 35.6762, 'lng' => 139.6503],
-        ['lat' => 35.6895, 'lng' => 139.6917],
+        ['lat' => -6.8163, 'lng' => 39.2807], // Posta
+        ['lat' => -6.8235, 'lng' => 39.2695], // Kariakoo
     ])
     ->destinations([
-        ['lat' => 35.6586, 'lng' => 139.7454],
-        ['lat' => 35.7100, 'lng' => 139.8107],
+        ['lat' => -6.7724, 'lng' => 39.2083], // Mlimani City
+        ['lat' => -6.7567, 'lng' => 39.2772], // Masaki
     ])
     ->driving()
     ->withTraffic()
