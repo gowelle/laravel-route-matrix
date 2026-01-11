@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Gowelle\LaravelRouteMatrix;
 
 use Gowelle\LaravelRouteMatrix\Contracts\GoogleRoutesClientInterface;
+use Gowelle\LaravelRouteMatrix\DataTransferObjects\RouteMatrixResponse;
 use Gowelle\LaravelRouteMatrix\DataTransferObjects\RoutesResponse;
 use Gowelle\LaravelRouteMatrix\Exceptions\GoogleRoutesException;
 use Gowelle\LaravelRouteMatrix\Exceptions\InvalidApiKeyException;
@@ -88,6 +89,62 @@ class GoogleRoutesClient implements GoogleRoutesClientInterface
     /**
      * {@inheritdoc}
      */
+    public function computeRouteMatrix(RouteMatrixRequest $request): RouteMatrixResponse
+    {
+        $this->validateApiKey();
+
+        try {
+            $response = $this->httpClient->post('/distanceMatrix/v2:computeRouteMatrix', [
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                    'X-Goog-Api-Key' => $this->apiKey,
+                    'X-Goog-FieldMask' => 'originIndex,destinationIndex,duration,distanceMeters,status,condition',
+                ],
+                'json' => $request->toArray(),
+            ]);
+
+            $body = $response->getBody()->getContents();
+
+            // The API returns a stream of JSON objects, one per line (NDJSON format)
+            $elements = [];
+            $lines = array_filter(explode("\n", $body));
+
+            foreach ($lines as $line) {
+                $decoded = json_decode($line, true);
+                if ($decoded !== null) {
+                    $elements[] = $decoded;
+                }
+            }
+
+            // If body was a single JSON array instead of NDJSON
+            if (empty($elements)) {
+                $decoded = json_decode($body, true);
+                if (is_array($decoded)) {
+                    // Check if it's an array of elements or a wrapper
+                    $elements = isset($decoded[0]) ? $decoded : [$decoded];
+                }
+            }
+
+            return RouteMatrixResponse::fromArray(
+                $elements,
+                $request->getOriginCount(),
+                $request->getDestinationCount()
+            );
+
+        } catch (ClientException $e) {
+            $this->handleClientException($e);
+        } catch (GuzzleException $e) {
+            throw new GoogleRoutesException(
+                'Failed to connect to Google Routes API: '.$e->getMessage(),
+                $e->getCode(),
+                $e
+            );
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function from(array|string $origin): RouteRequest
     {
         $request = new RouteRequest($this);
@@ -104,6 +161,14 @@ class GoogleRoutesClient implements GoogleRoutesClientInterface
         }
 
         return $request->from(Waypoint::fromAddress($origin));
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function matrix(): RouteMatrixRequest
+    {
+        return new RouteMatrixRequest($this);
     }
 
     /**

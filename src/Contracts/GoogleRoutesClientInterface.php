@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Gowelle\LaravelRouteMatrix\Contracts;
 
+use Gowelle\LaravelRouteMatrix\DataTransferObjects\RouteMatrixResponse;
 use Gowelle\LaravelRouteMatrix\DataTransferObjects\RoutesResponse;
+use Gowelle\LaravelRouteMatrix\RouteMatrixRequest;
 use Gowelle\LaravelRouteMatrix\RouteRequest;
 
 /**
@@ -20,11 +22,23 @@ interface GoogleRoutesClientInterface
     public function computeRoutes(RouteRequest $request): RoutesResponse;
 
     /**
+     * Compute a route matrix based on the given request.
+     *
+     * @throws \Gowelle\LaravelRouteMatrix\Exceptions\GoogleRoutesException
+     */
+    public function computeRouteMatrix(RouteMatrixRequest $request): RouteMatrixResponse;
+
+    /**
      * Start building a new route request from an origin.
      *
      * @param  array{lat?: float, latitude?: float, lng?: float, longitude?: float}|string  $origin
      */
     public function from(array|string $origin): RouteRequest;
+
+    /**
+     * Start building a new route matrix request.
+     */
+    public function matrix(): RouteMatrixRequest;
 
     /**
      * Get the API key being used.

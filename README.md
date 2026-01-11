@@ -4,7 +4,7 @@
 [![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/gowelle/laravel-route-matrix/tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/gowelle/laravel-route-matrix/actions?query=workflow%3Atests+branch%3Amain)
 [![Total Downloads](https://img.shields.io/packagist/dt/gowelle/laravel-route-matrix.svg?style=flat-square)](https://packagist.org/packages/gowelle/laravel-route-matrix)
 
-A Laravel wrapper package for the [Google Routes API](https://developers.google.com/maps/documentation/routes) (Compute Routes). Calculate optimal routes between locations with support for multiple travel modes, traffic-aware routing, waypoint optimization, and more.
+A Laravel wrapper package for the [Google Routes API](https://developers.google.com/maps/documentation/routes). Calculate optimal routes between locations with support for multiple travel modes, traffic-aware routing, waypoint optimization, and distance matrices.
 
 ## Features
 
@@ -14,7 +14,8 @@ A Laravel wrapper package for the [Google Routes API](https://developers.google.
 - 🔄 **Alternative Routes** - Get multiple route options
 - ⛽ **Fuel-Efficient Routes** - Request eco-friendly route alternatives
 - 🛣️ **Route Modifiers** - Avoid tolls, highways, ferries, or indoor paths
-- 📊 **Extra Computations** - Toll costs, fuel consumption, traffic on polyline
+- 📊 **Distance Matrix** - Calculate distances/durations for multiple origin-destination pairs
+- 🎯 **Find Closest** - Get the closest or fastest destination from multiple options
 - 🌐 **Localization** - Language and unit system support
 - ⚡ **Fluent API** - Elegant, chainable method calls
 - 🧪 **Fully Tested** - Comprehensive test suite with Pest PHP
@@ -320,6 +321,103 @@ if (!empty($route->warnings)) {
     }
 }
 ```
+
+## Route Matrix (Distance Matrix)
+
+The Route Matrix API allows you to calculate distances and travel times between multiple origins and destinations efficiently.
+
+### One Origin to Multiple Destinations
+
+```php
+use Gowelle\LaravelRouteMatrix\Facades\GoogleRoutes;
+
+$response = GoogleRoutes::matrix()
+    ->addOrigin(['lat' => 35.6762, 'lng' => 139.6503]) // Your location
+    ->addDestination(['lat' => 35.6586, 'lng' => 139.7454]) // Tokyo Tower
+    ->addDestination(['lat' => 35.6895, 'lng' => 139.6917]) // Shinjuku
+    ->addDestination(['lat' => 35.7100, 'lng' => 139.8107]) // Asakusa
+    ->driving()
+    ->get();
+
+// Find the closest destination
+$closest = $response->getClosestDestination(0);
+echo "Closest: {$closest->getDistanceInKilometers()} km";
+
+// Find the fastest destination
+$fastest = $response->getFastestDestination(0);
+echo "Fastest: {$fastest->getFormattedDuration()}";
+```
+
+### Multiple Origins to One Destination
+
+```php
+// Find which store/warehouse is closest to a customer
+$response = GoogleRoutes::matrix()
+    ->addOrigin(['lat' => 35.6762, 'lng' => 139.6503]) // Store A
+    ->addOrigin(['lat' => 35.6895, 'lng' => 139.6917]) // Store B
+    ->addOrigin(['lat' => 35.7100, 'lng' => 139.8107]) // Store C
+    ->addDestination(['lat' => 35.6586, 'lng' => 139.7454]) // Customer
+    ->driving()
+    ->get();
+
+$closestStore = $response->getClosestOrigin(0);
+echo "Ship from store at origin index: {$closestStore->originIndex}";
+```
+
+### Many to Many (Full Matrix)
+
+```php
+$response = GoogleRoutes::matrix()
+    ->origins([
+        ['lat' => 35.6762, 'lng' => 139.6503],
+        ['lat' => 35.6895, 'lng' => 139.6917],
+    ])
+    ->destinations([
+        ['lat' => 35.6586, 'lng' => 139.7454],
+        ['lat' => 35.7100, 'lng' => 139.8107],
+    ])
+    ->driving()
+    ->withTraffic()
+    ->get();
+
+// Access specific element (origin 0 → destination 1)
+$element = $response->get(0, 1);
+echo "Distance: {$element->getDistanceInKilometers()} km";
+echo "Duration: {$element->getFormattedDuration()}";
+
+// Convert to 2D matrix format
+$matrix = $response->toMatrix();
+// $matrix[originIndex][destinationIndex] = RouteMatrixElement
+```
+
+### Sorting Results
+
+```php
+// Get all destinations sorted by distance (closest first)
+$sortedByDistance = $response->sortedByDistance();
+
+// Get all destinations sorted by duration (fastest first)
+$sortedByDuration = $response->sortedByDuration();
+
+// Get only elements where a route was found
+$validRoutes = $response->withRoutes();
+```
+
+### RouteMatrixElement Properties
+
+Each element in the matrix contains:
+- `originIndex` - Index of the origin (0-based)
+- `destinationIndex` - Index of the destination (0-based)
+- `distanceMeters` - Distance in meters
+- `duration` - Duration string (e.g., "1234s")
+- `condition` - Route condition (ROUTE_EXISTS, ROUTE_NOT_FOUND)
+
+Helper methods:
+- `routeExists()` - Check if a route was found
+- `getDurationInSeconds()` - Get duration as integer
+- `getDistanceInKilometers()` - Get distance in km
+- `getDistanceInMiles()` - Get distance in miles
+- `getFormattedDuration()` - Get human-readable duration
 
 ## Response Objects
 
