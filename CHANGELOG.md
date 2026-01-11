@@ -4,6 +4,19 @@ All notable changes to `laravel-route-matrix` will be documented in this file.
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-01-11
+
+### Added
+- Compute Route Matrix API support for one-to-many and many-to-many distance calculations
+- `RouteMatrixRequest` fluent builder for matrix requests
+- `RouteMatrixResponse` DTO with helper methods
+- `RouteMatrixElement` DTO for individual matrix elements
+- `RouteMatrixElementCondition` enum
+- Helper methods: `getClosestDestination()`, `getFastestDestination()`, `getClosestOrigin()`, `getFastestOrigin()`
+- Sorting methods: `sortedByDistance()`, `sortedByDuration()`
+- Matrix conversion: `toMatrix()` for 2D array access
+- 13 new integration tests for Route Matrix functionality
+
 ## [1.0.0] - 2026-01-11
 
 ### Added
@@ -22,3 +35,4 @@ All notable changes to `laravel-route-matrix` will be documented in this file.
 - Full test suite with unit, feature, and integration tests
 - Support for Laravel 10, 11, and 12
 - Support for PHP 8.2, 8.3, and 8.4
+
