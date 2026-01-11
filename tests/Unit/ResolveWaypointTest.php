@@ -12,7 +12,7 @@ class ResolveWaypointTest extends TestCase
 {
     public function test_resolves_lat_lng_string_in_route_matrix_request()
     {
-        $request = new RouteMatrixRequest();
+        $request = new RouteMatrixRequest;
         $request->addOrigin('-6.8105,39.2028');
         $request->addDestination('Dar es Salaam');
 
@@ -27,7 +27,7 @@ class ResolveWaypointTest extends TestCase
 
     public function test_resolves_lat_lng_string_in_route_request()
     {
-        $request = new RouteRequest();
+        $request = new RouteRequest;
         $request->from('-6.8105,39.2028');
         $request->to('Dar es Salaam');
 
@@ -42,7 +42,7 @@ class ResolveWaypointTest extends TestCase
 
     public function test_resolves_lat_lng_string_with_spaces()
     {
-        $request = new RouteRequest();
+        $request = new RouteRequest;
         $request->from('-6.8105, 39.2028'); // Space after comma
         $request->to('Dar es Salaam');
 
