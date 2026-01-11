@@ -455,6 +455,11 @@ class RouteMatrixRequest
             return Waypoint::fromArray($input);
         }
 
+        // Check for "lat,lng" string format
+        if (preg_match('/^([-+]?\d{1,2}(?:\.\d+)?),\s*([-+]?\d{1,3}(?:\.\d+)?)$/', $input, $matches)) {
+            return Waypoint::fromLatLng((float) $matches[1], (float) $matches[2]);
+        }
+
         // String could be a place ID or address
         if (str_starts_with($input, 'ChIJ') || str_starts_with($input, 'place_id:')) {
             $placeId = str_replace('place_id:', '', $input);
