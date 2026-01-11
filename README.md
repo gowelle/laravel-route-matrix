@@ -4,21 +4,41 @@
 [![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/gowelle/laravel-route-matrix/tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/gowelle/laravel-route-matrix/actions?query=workflow%3Atests+branch%3Amain)
 [![Total Downloads](https://img.shields.io/packagist/dt/gowelle/laravel-route-matrix.svg?style=flat-square)](https://packagist.org/packages/gowelle/laravel-route-matrix)
 
-A Laravel wrapper package for the [Google Routes API](https://developers.google.com/maps/documentation/routes). Calculate optimal routes between locations with support for multiple travel modes, traffic-aware routing, waypoint optimization, and distance matrices.
+A Laravel wrapper for the [Google Routes API](https://developers.google.com/maps/documentation/routes) with support for route calculation, distance matrices, and waypoint optimization.
+
+## Table of Contents
+
+- [Features](#features)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Usage](#usage)
+  - [Basic Route Calculation](#basic-route-calculation)
+  - [Travel Modes](#travel-modes)
+  - [Traffic-Aware Routing](#traffic-aware-routing)
+  - [Route Modifiers](#route-modifiers)
+  - [Alternative Routes](#alternative-routes)
+  - [Waypoint Optimization](#waypoint-optimization)
+- [Route Matrix](#route-matrix-distance-matrix)
+  - [One to Many](#one-origin-to-multiple-destinations)
+  - [Many to One](#multiple-origins-to-one-destination)
+  - [Many to Many](#many-to-many-full-matrix)
+  - [Courier Example](#real-world-example-courier-pickup--delivery)
+- [Response Objects](#response-objects)
+- [Configuration](#configuration)
+- [Exception Handling](#exception-handling)
+- [Testing](#testing)
+- [License](#license)
 
 ## Features
 
-- 🚗 **Multiple Travel Modes** - Support for driving, walking, bicycling, two-wheeler, and transit
-- 🚦 **Traffic-Aware Routing** - Real-time and historical traffic data integration
-- 📍 **Flexible Waypoints** - Use coordinates, Place IDs, or addresses
-- 🔄 **Alternative Routes** - Get multiple route options
-- ⛽ **Fuel-Efficient Routes** - Request eco-friendly route alternatives
-- 🛣️ **Route Modifiers** - Avoid tolls, highways, ferries, or indoor paths
-- 📊 **Distance Matrix** - Calculate distances/durations for multiple origin-destination pairs
-- 🎯 **Find Closest** - Get the closest or fastest destination from multiple options
-- 🌐 **Localization** - Language and unit system support
+- 🚗 **Multiple Travel Modes** - Driving, walking, bicycling, two-wheeler, transit
+- 🚦 **Traffic-Aware Routing** - Real-time and historical traffic data
+- 📍 **Flexible Waypoints** - Coordinates, Place IDs, or addresses
+- 📊 **Distance Matrix** - Calculate N×M origin-destination pairs
+- 🎯 **Find Closest** - Get closest/fastest destination helpers
 - ⚡ **Fluent API** - Elegant, chainable method calls
-- 🧪 **Fully Tested** - Comprehensive test suite with Pest PHP
+- 🧪 **Fully Tested** - 125+ tests with Pest PHP
 
 ## Requirements
 
