@@ -2,11 +2,16 @@
 
 All notable changes to `laravel-route-matrix` will be documented in this file.
 
+## v1.1.1 - 2026-01-11
+
+**Full Changelog**: https://github.com/gowelle/laravel-route-matrix/compare/v1.1.0...v1.1.1
+
 ## [Unreleased]
 
 ## [1.1.0] - 2026-01-11
 
 ### Added
+
 - Compute Route Matrix API support for one-to-many and many-to-many distance calculations
 - `RouteMatrixRequest` fluent builder for matrix requests
 - `RouteMatrixResponse` DTO with helper methods
@@ -20,6 +25,7 @@ All notable changes to `laravel-route-matrix` will be documented in this file.
 ## [1.0.0] - 2026-01-11
 
 ### Added
+
 - Initial release
 - Support for Google Routes API Compute Routes endpoint
 - Fluent API for building route requests
@@ -35,4 +41,3 @@ All notable changes to `laravel-route-matrix` will be documented in this file.
 - Full test suite with unit, feature, and integration tests
 - Support for Laravel 10, 11, and 12
 - Support for PHP 8.2, 8.3, and 8.4
-
