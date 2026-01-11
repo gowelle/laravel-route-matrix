@@ -1,7 +1,7 @@
 # Laravel Route Matrix
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/gowelle/laravel-route-matrix.svg?style=flat-square)](https://packagist.org/packages/gowelle/laravel-route-matrix)
-[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/gowelle/laravel-route-matrix/tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/gowelle/laravel-route-matrix/actions?query=workflow%3Atests+branch%3Amain)
+[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/gowelle/laravel-route-matrix/tests.yml?branch=master&label=tests&style=flat-square)](https://github.com/gowelle/laravel-route-matrix/actions?query=workflow%3Atests+branch%3Amaster)
 [![Total Downloads](https://img.shields.io/packagist/dt/gowelle/laravel-route-matrix.svg?style=flat-square)](https://packagist.org/packages/gowelle/laravel-route-matrix)
 
 A Laravel wrapper for the [Google Routes API](https://developers.google.com/maps/documentation/routes) with support for route calculation, distance matrices, and waypoint optimization.
