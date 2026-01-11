@@ -1,0 +1,78 @@
+{
+    "name": "gowelle/laravel-route-matrix",
+    "description": "A Laravel wrapper package for Google Routes API (Compute Routes)",
+    "keywords": [
+        "laravel",
+        "google",
+        "routes",
+        "api",
+        "directions",
+        "maps",
+        "compute-routes"
+    ],
+    "homepage": "https://github.com/gowelle/laravel-route-matrix",
+    "license": "MIT",
+    "type": "library",
+    "authors": [
+        {
+            "name": "John Gowelle",
+            "homepage": "https://github.com/gowelle"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "illuminate/contracts": "^10.0|^11.0|^12.0",
+        "illuminate/http": "^10.0|^11.0|^12.0",
+        "illuminate/support": "^10.0|^11.0|^12.0",
+        "guzzlehttp/guzzle": "^7.0"
+    },
+    "require-dev": {
+        "laravel/pint": "^1.0",
+        "orchestra/testbench": "^8.0|^9.0|^10.0",
+        "pestphp/pest": "^2.0|^3.0",
+        "pestphp/pest-plugin-laravel": "^2.0|^3.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Gowelle\\LaravelRouteMatrix\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Gowelle\\LaravelRouteMatrix\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "@setup-hooks"
+        ],
+        "post-update-cmd": [
+            "@setup-hooks"
+        ],
+        "setup-hooks": [
+            "git config core.hooksPath .hooks || true"
+        ],
+        "test": "vendor/bin/pest",
+        "test-coverage": "vendor/bin/pest --coverage",
+        "format": "vendor/bin/pint",
+        "format-check": "vendor/bin/pint --test"
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Gowelle\\LaravelRouteMatrix\\GoogleRoutesServiceProvider"
+            ],
+            "aliases": {
+                "GoogleRoutes": "Gowelle\\LaravelRouteMatrix\\Facades\\GoogleRoutes"
+            }
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
