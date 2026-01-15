@@ -7,3 +7,5 @@ parameters:
         - src
     tmpDir: build/phpstan
     checkModelProperties: true
+    ignoreErrors:
+        - identifier: trait.unused
