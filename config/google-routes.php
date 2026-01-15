@@ -90,4 +90,17 @@ return [
         'routes.distanceMeters',
         'routes.polyline.encodedPolyline',
     ],
+    /*
+    |--------------------------------------------------------------------------
+    | Response Caching
+    |--------------------------------------------------------------------------
+    |
+    | Configure response caching to reduce API costs and improve performance.
+    |
+    */
+    'cache' => [
+        'enabled' => env('GOOGLE_ROUTES_CACHE_ENABLED', false),
+        'store' => env('GOOGLE_ROUTES_CACHE_STORE', null),
+        'ttl' => env('GOOGLE_ROUTES_CACHE_TTL', 3600),
+    ],
 ];

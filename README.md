@@ -345,6 +345,61 @@ if (!empty($route->warnings)) {
 }
 ```
 
+## Eloquent Integration (Routable Trait)
+
+You can make your Eloquent models "routable" by implementing the `Routable` contract and using the `HasRoute` trait. This allows you to pass models directly to the API headers.
+
+1. Implement the interface and trait:
+
+```php
+use Illuminate\Database\Eloquent\Model;
+use Gowelle\LaravelRouteMatrix\Contracts\Routable;
+use Gowelle\LaravelRouteMatrix\Traits\HasRoute;
+
+class Store extends Model implements Routable
+{
+    use HasRoute;
+    
+    // Optional: Customize how the waypoint is resolved
+    // (Defaults to looking for lat/lng, latitude/longitude, or address attributes)
+}
+```
+
+2. Use models in route requests:
+
+```php
+$store = Store::find(1);
+$customer = User::find(5); // Assuming User also implements Routable
+
+$response = GoogleRoutes::from($store)
+    ->to($customer)
+    ->get();
+```
+
+3. Or initiate directly from the model:
+
+```php
+$response = $store->routeTo($customer)
+    ->driving()
+    ->get();
+```
+
+## Response Caching
+
+To reduce API costs and improve performance, you can enable built-in caching.
+
+1. Configure caching in `config/google-routes.php`:
+
+```php
+'cache' => [
+    'enabled' => true,
+    'store' => 'redis', // or 'file', 'database'
+    'ttl' => 3600,      // Cache duration in seconds
+],
+```
+
+When enabled, identical requests (same origin, destination, and options) will be served from the cache for the specified TTL duration.
+
 ## Route Matrix (Distance Matrix)
 
 The Route Matrix API allows you to calculate distances and travel times between multiple origins and destinations efficiently.

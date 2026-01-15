@@ -27,6 +27,7 @@
         "guzzlehttp/guzzle": "^7.0"
     },
     "require-dev": {
+        "larastan/larastan": "^3.8",
         "laravel/pint": "^1.0",
         "orchestra/testbench": "^8.0|^9.0|^10.0",
         "pestphp/pest": "^2.0|^3.0",
@@ -55,7 +56,8 @@
         "test": "vendor/bin/pest",
         "test-coverage": "vendor/bin/pest --coverage",
         "format": "vendor/bin/pint",
-        "format-check": "vendor/bin/pint --test"
+        "format-check": "vendor/bin/pint --test",
+        "analyse": "php -d memory_limit=2G vendor/bin/phpstan analyse"
     },
     "config": {
         "sort-packages": true,

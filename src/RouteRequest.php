@@ -6,6 +6,7 @@ namespace Gowelle\LaravelRouteMatrix;
 
 use DateTimeInterface;
 use Gowelle\LaravelRouteMatrix\Contracts\GoogleRoutesClientInterface;
+use Gowelle\LaravelRouteMatrix\Contracts\Routable;
 use Gowelle\LaravelRouteMatrix\DataTransferObjects\RoutesResponse;
 use Gowelle\LaravelRouteMatrix\Enums\ExtraComputation;
 use Gowelle\LaravelRouteMatrix\Enums\PolylineEncoding;
@@ -84,7 +85,7 @@ class RouteRequest
      *
      * @param  Waypoint|array{lat?: float, latitude?: float, lng?: float, longitude?: float}|string  $origin
      */
-    public function from(Waypoint|array|string $origin): self
+    public function from(Waypoint|Routable|array|string $origin): self
     {
         $this->origin = $this->resolveWaypoint($origin);
 
@@ -96,7 +97,7 @@ class RouteRequest
      *
      * @param  Waypoint|array{lat?: float, latitude?: float, lng?: float, longitude?: float}|string  $destination
      */
-    public function to(Waypoint|array|string $destination): self
+    public function to(Waypoint|Routable|array|string $destination): self
     {
         $this->destination = $this->resolveWaypoint($destination);
 
@@ -312,9 +313,9 @@ class RouteRequest
     {
         $this->routeModifiers = new RouteModifiers(
             avoidTolls: $avoid,
-            avoidHighways: $this->routeModifiers?->avoidHighways ?? false,
-            avoidFerries: $this->routeModifiers?->avoidFerries ?? false,
-            avoidIndoor: $this->routeModifiers?->avoidIndoor ?? false,
+            avoidHighways: $this->routeModifiers->avoidHighways ?? false,
+            avoidFerries: $this->routeModifiers->avoidFerries ?? false,
+            avoidIndoor: $this->routeModifiers->avoidIndoor ?? false,
         );
 
         return $this;
@@ -326,10 +327,10 @@ class RouteRequest
     public function avoidHighways(bool $avoid = true): self
     {
         $this->routeModifiers = new RouteModifiers(
-            avoidTolls: $this->routeModifiers?->avoidTolls ?? false,
+            avoidTolls: $this->routeModifiers->avoidTolls ?? false,
             avoidHighways: $avoid,
-            avoidFerries: $this->routeModifiers?->avoidFerries ?? false,
-            avoidIndoor: $this->routeModifiers?->avoidIndoor ?? false,
+            avoidFerries: $this->routeModifiers->avoidFerries ?? false,
+            avoidIndoor: $this->routeModifiers->avoidIndoor ?? false,
         );
 
         return $this;
@@ -341,10 +342,10 @@ class RouteRequest
     public function avoidFerries(bool $avoid = true): self
     {
         $this->routeModifiers = new RouteModifiers(
-            avoidTolls: $this->routeModifiers?->avoidTolls ?? false,
-            avoidHighways: $this->routeModifiers?->avoidHighways ?? false,
+            avoidTolls: $this->routeModifiers->avoidTolls ?? false,
+            avoidHighways: $this->routeModifiers->avoidHighways ?? false,
             avoidFerries: $avoid,
-            avoidIndoor: $this->routeModifiers?->avoidIndoor ?? false,
+            avoidIndoor: $this->routeModifiers->avoidIndoor ?? false,
         );
 
         return $this;
@@ -356,9 +357,9 @@ class RouteRequest
     public function avoidIndoor(bool $avoid = true): self
     {
         $this->routeModifiers = new RouteModifiers(
-            avoidTolls: $this->routeModifiers?->avoidTolls ?? false,
-            avoidHighways: $this->routeModifiers?->avoidHighways ?? false,
-            avoidFerries: $this->routeModifiers?->avoidFerries ?? false,
+            avoidTolls: $this->routeModifiers->avoidTolls ?? false,
+            avoidHighways: $this->routeModifiers->avoidHighways ?? false,
+            avoidFerries: $this->routeModifiers->avoidFerries ?? false,
             avoidIndoor: $avoid,
         );
 
@@ -640,10 +641,17 @@ class RouteRequest
     /**
      * Resolve a waypoint from various input types.
      */
-    private function resolveWaypoint(Waypoint|array|string $input): Waypoint
+    /**
+     * Resolve a waypoint from various input types.
+     */
+    private function resolveWaypoint(Waypoint|Routable|array|string $input): Waypoint
     {
         if ($input instanceof Waypoint) {
             return $input;
+        }
+
+        if ($input instanceof Routable) {
+            return $input->getWaypoint();
         }
 
         if (is_array($input)) {

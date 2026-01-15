@@ -9,3 +9,4 @@ phpunit.xml.dist.local
 .env
 coverage/
 .phpunit.cache
+build/

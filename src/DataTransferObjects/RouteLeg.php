@@ -19,8 +19,8 @@ final readonly class RouteLeg
         public ?string $duration = null,
         public ?string $staticDuration = null,
         public ?Polyline $polyline = null,
-        public ?array $startLocation = null,
-        public ?array $endLocation = null,
+        public ?\Gowelle\LaravelRouteMatrix\ValueObjects\LatLng $startLocation = null,
+        public ?\Gowelle\LaravelRouteMatrix\ValueObjects\LatLng $endLocation = null,
         public Collection $steps = new Collection,
     ) {}
 
@@ -37,8 +37,12 @@ final readonly class RouteLeg
             duration: $data['duration'] ?? null,
             staticDuration: $data['staticDuration'] ?? null,
             polyline: isset($data['polyline']) ? Polyline::fromArray($data['polyline']) : null,
-            startLocation: $data['startLocation']['latLng'] ?? null,
-            endLocation: $data['endLocation']['latLng'] ?? null,
+            startLocation: isset($data['startLocation']['latLng'])
+                ? \Gowelle\LaravelRouteMatrix\ValueObjects\LatLng::fromArray($data['startLocation']['latLng'])
+                : null,
+            endLocation: isset($data['endLocation']['latLng'])
+                ? \Gowelle\LaravelRouteMatrix\ValueObjects\LatLng::fromArray($data['endLocation']['latLng'])
+                : null,
             steps: $steps,
         );
     }

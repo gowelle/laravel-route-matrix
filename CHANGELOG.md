@@ -2,11 +2,26 @@
 
 All notable changes to `laravel-route-matrix` will be documented in this file.
 
+## [1.2.0] - 2026-01-16
+
+### Added
+
+- **Response Caching**: Built-in caching for Route and Matrix requests to reduce API costs.
+- **Resiliency**: Automatic retry mechanism (Exponential Backoff) for 5xx errors and 429 Rate Limiting.
+- **Request Middleware**: Support for injecting custom Guzzle middleware for logging/debugging.
+- **Helper Traits**: Introduced `Routable` contract and `HasRoute` trait for seamless Eloquent model integration.
+- **Strict DTOs**: Refactored internal logic to use strict Data Transfer Objects for better type safety.
+- **Enhanced Error Handling**: New exception classes `OverQueryLimitException` and `RequestDeniedException`.
+- **Quality**: Integrated `larastan` (Level 5) and `pint` for static analysis and code style.
+
+### Changed
+
+- Refactored `GoogleRoutesClient` to accept a custom `handler` for better testing.
+- Updated all tests to use standard Guzzle `MockHandler`.
+
 ## v1.1.1 - 2026-01-11
 
 **Full Changelog**: https://github.com/gowelle/laravel-route-matrix/compare/v1.1.0...v1.1.1
-
-## [Unreleased]
 
 ## [1.1.0] - 2026-01-11
 

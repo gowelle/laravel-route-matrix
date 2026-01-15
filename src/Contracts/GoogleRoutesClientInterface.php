@@ -31,9 +31,9 @@ interface GoogleRoutesClientInterface
     /**
      * Start building a new route request from an origin.
      *
-     * @param  array{lat?: float, latitude?: float, lng?: float, longitude?: float}|string  $origin
+     * @param  Routable|array{lat?: float, latitude?: float, lng?: float, longitude?: float}|string  $origin
      */
-    public function from(array|string $origin): RouteRequest;
+    public function from(Routable|array|string $origin): RouteRequest;
 
     /**
      * Start building a new route matrix request.

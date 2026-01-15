@@ -5,16 +5,20 @@ declare(strict_types=1);
 namespace Gowelle\LaravelRouteMatrix;
 
 use Gowelle\LaravelRouteMatrix\Contracts\GoogleRoutesClientInterface;
+use Gowelle\LaravelRouteMatrix\Contracts\Routable;
 use Gowelle\LaravelRouteMatrix\DataTransferObjects\RouteMatrixResponse;
 use Gowelle\LaravelRouteMatrix\DataTransferObjects\RoutesResponse;
 use Gowelle\LaravelRouteMatrix\Exceptions\GoogleRoutesException;
 use Gowelle\LaravelRouteMatrix\Exceptions\InvalidApiKeyException;
 use Gowelle\LaravelRouteMatrix\Exceptions\InvalidRequestException;
 use Gowelle\LaravelRouteMatrix\Exceptions\NoRouteFoundException;
-use Gowelle\LaravelRouteMatrix\ValueObjects\Waypoint;
+use Gowelle\LaravelRouteMatrix\Exceptions\OverQueryLimitException;
+use Gowelle\LaravelRouteMatrix\Exceptions\RequestDeniedException;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
 
 /**
  * Client for interacting with the Google Routes API.
@@ -29,6 +33,8 @@ class GoogleRoutesClient implements GoogleRoutesClientInterface
 
     private int $timeout;
 
+    private ?\Illuminate\Contracts\Cache\Repository $cache;
+
     /**
      * Create a new GoogleRoutesClient instance.
      */
@@ -37,14 +43,85 @@ class GoogleRoutesClient implements GoogleRoutesClientInterface
         ?string $baseUrl = null,
         ?int $timeout = null,
         ?Client $httpClient = null,
+        int $maxRetries = 3,
+        ?\Illuminate\Contracts\Cache\Repository $cache = null,
+        array $middleware = [],
+        ?callable $handler = null,
     ) {
         $this->apiKey = $apiKey ?? config('google-routes.api_key');
         $this->baseUrl = $baseUrl ?? config('google-routes.base_url', 'https://routes.googleapis.com');
         $this->timeout = $timeout ?? config('google-routes.timeout', 30);
-        $this->httpClient = $httpClient ?? new Client([
-            'base_uri' => $this->baseUrl,
-            'timeout' => $this->timeout,
-        ]);
+        $this->cache = $cache;
+
+        if ($httpClient) {
+            $this->httpClient = $httpClient;
+        } else {
+            $stack = HandlerStack::create($handler);
+
+            // Add custom middleware
+            foreach ($middleware as $name => $m) {
+                if (is_string($name)) {
+                    $stack->push($m, $name);
+                } else {
+                    $stack->push($m);
+                }
+            }
+
+            $stack->push(Middleware::retry($this->retryDecider($maxRetries), $this->retryDelay()));
+
+            $this->httpClient = new Client([
+                'base_uri' => $this->baseUrl,
+                'timeout' => $this->timeout,
+                'handler' => $stack,
+            ]);
+        }
+    }
+
+    /**
+     * Decider for retry logic.
+     */
+    private function retryDecider(int $maxRetries): \Closure
+    {
+        return function (
+            $retries,
+            $request,
+            $response = null,
+            $exception = null
+        ) use ($maxRetries) {
+            // Don't retry if we have exceeded max retries
+            if ($retries >= $maxRetries) {
+                return false;
+            }
+
+            // Retry on connection exceptions (timeout, DNS, etc.)
+            if ($exception instanceof \GuzzleHttp\Exception\ConnectException) {
+                return true;
+            }
+
+            if ($response) {
+                // Retry on server errors (5xx)
+                if ($response->getStatusCode() >= 500) {
+                    return true;
+                }
+
+                // Retry on rate limiting (429)
+                if ($response->getStatusCode() === 429) {
+                    return true;
+                }
+            }
+
+            return false;
+        };
+    }
+
+    /**
+     * Delay strategy (Exponential Backoff).
+     */
+    private function retryDelay(): \Closure
+    {
+        return function ($numberOfRetries) {
+            return 1000 * pow(2, $numberOfRetries - 1); // 1000ms, 2000ms, 4000ms
+        };
     }
 
     /**
@@ -53,6 +130,12 @@ class GoogleRoutesClient implements GoogleRoutesClientInterface
     public function computeRoutes(RouteRequest $request): RoutesResponse
     {
         $this->validateApiKey();
+
+        $cacheKey = $this->getCacheKey('routes', $request->toArray());
+
+        if ($this->shouldCache() && ($cached = $this->cache->get($cacheKey))) {
+            return RoutesResponse::fromArray($cached);
+        }
 
         try {
             $response = $this->httpClient->post('/directions/v2:computeRoutes', [
@@ -65,12 +148,17 @@ class GoogleRoutesClient implements GoogleRoutesClientInterface
             ]);
 
             $data = json_decode($response->getBody()->getContents(), true);
+            $data = $data ?? [];
 
-            $routesResponse = RoutesResponse::fromArray($data ?? []);
+            $routesResponse = RoutesResponse::fromArray($data);
 
             // Check if no routes were found
             if (! $routesResponse->hasRoutes()) {
                 throw new NoRouteFoundException;
+            }
+
+            if ($this->shouldCache()) {
+                $this->cache->put($cacheKey, $data, config('google-routes.cache.ttl', 3600));
             }
 
             return $routesResponse;
@@ -92,6 +180,16 @@ class GoogleRoutesClient implements GoogleRoutesClientInterface
     public function computeRouteMatrix(RouteMatrixRequest $request): RouteMatrixResponse
     {
         $this->validateApiKey();
+
+        $cacheKey = $this->getCacheKey('matrix', $request->toArray());
+
+        if ($this->shouldCache() && ($cached = $this->cache->get($cacheKey))) {
+            return RouteMatrixResponse::fromArray(
+                $cached,
+                $request->getOriginCount(),
+                $request->getDestinationCount()
+            );
+        }
 
         try {
             $response = $this->httpClient->post('/distanceMatrix/v2:computeRouteMatrix', [
@@ -125,6 +223,10 @@ class GoogleRoutesClient implements GoogleRoutesClientInterface
                 }
             }
 
+            if ($this->shouldCache()) {
+                $this->cache->put($cacheKey, $elements, config('google-routes.cache.ttl', 3600));
+            }
+
             return RouteMatrixResponse::fromArray(
                 $elements,
                 $request->getOriginCount(),
@@ -143,24 +245,29 @@ class GoogleRoutesClient implements GoogleRoutesClientInterface
     }
 
     /**
+     * Check if caching is enabled and available.
+     */
+    private function shouldCache(): bool
+    {
+        return $this->cache !== null && config('google-routes.cache.enabled', false);
+    }
+
+    /**
+     * Generate a unique cache key for the request.
+     */
+    private function getCacheKey(string $type, array $params): string
+    {
+        return 'google_routes_'.$type.'_'.md5(serialize($params));
+    }
+
+    /**
      * {@inheritdoc}
      */
-    public function from(array|string $origin): RouteRequest
+    public function from(Routable|array|string $origin): RouteRequest
     {
         $request = new RouteRequest($this);
 
-        if (is_array($origin)) {
-            return $request->from(Waypoint::fromArray($origin));
-        }
-
-        // String could be a Place ID or address
-        if (str_starts_with($origin, 'ChIJ') || str_starts_with($origin, 'place_id:')) {
-            $placeId = str_replace('place_id:', '', $origin);
-
-            return $request->from(Waypoint::fromPlaceId($placeId));
-        }
-
-        return $request->from(Waypoint::fromAddress($origin));
+        return $request->from($origin);
     }
 
     /**
@@ -219,7 +326,9 @@ class GoogleRoutesClient implements GoogleRoutesClientInterface
 
         throw match ($statusCode) {
             400 => new InvalidRequestException($message),
-            401, 403 => new InvalidApiKeyException($message),
+            401 => new InvalidApiKeyException($message),
+            403 => new RequestDeniedException($message),
+            429 => new OverQueryLimitException($message),
             404 => new NoRouteFoundException($message),
             default => GoogleRoutesException::fromApiError($error, $statusCode),
         };
