@@ -25,6 +25,7 @@ A Laravel wrapper for the [Google Routes API](https://developers.google.com/maps
   - [Many to Many](#many-to-many-full-matrix)
   - [Courier Example](#real-world-example-courier-pickup--delivery)
 - [Response Objects](#response-objects)
+- [Eloquent Integration](#eloquent-integration-routable-trait)
 - [Configuration](#configuration)
 - [Exception Handling](#exception-handling)
 - [Testing](#testing)
@@ -658,6 +659,20 @@ return [
         'routes.duration',
         'routes.distanceMeters',
         'routes.polyline.encodedPolyline',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Response Caching
+    |--------------------------------------------------------------------------
+    |
+    | Configure response caching to reduce API costs and improve performance.
+    |
+    */
+    'cache' => [
+        'enabled' => env('GOOGLE_ROUTES_CACHE_ENABLED', false),
+        'store' => env('GOOGLE_ROUTES_CACHE_STORE', null),
+        'ttl' => env('GOOGLE_ROUTES_CACHE_TTL', 3600),
     ],
 ];
 ```
