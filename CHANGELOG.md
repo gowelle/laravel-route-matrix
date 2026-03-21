@@ -2,6 +2,13 @@
 
 All notable changes to `laravel-route-matrix` will be documented in this file.
 
+## v2.0.1 - 2026-03-22
+
+### Fixed
+
+- **CI**: Matrix installs use `composer require --dev` so `laravel/framework` and `orchestra/testbench` stay in `require-dev` (not moved to `require`).
+- **CI / dev tooling**: **Pest 4** and **pest-plugin-laravel 4** (replacing v3) so Composer can resolve **Laravel 13** with `pest-plugin-laravel`; **PHPUnit 12** schema in `phpunit.xml`.
+
 ## v2.0.0 - 2026-03-22
 
 ### Breaking changes
