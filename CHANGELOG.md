@@ -2,6 +2,24 @@
 
 All notable changes to `laravel-route-matrix` will be documented in this file.
 
+## v2.0.1 — CI fix for Laravel 13 (Pest 4) - 2026-03-21
+
+### Summary
+
+Patch release for **v2.0.0**: fixes GitHub Actions when the matrix installs **Laravel 13**, and keeps dev dependencies in the right Composer section.
+
+### Changes
+
+- **Pest 4** and **pest-plugin-laravel 4** — v3 of the Laravel plugin did not support Laravel 13; upgrading restores a resolvable dependency set for the L13 CI job.
+- **PHPUnit 12** — phpunit.xml schema updated to match the stack pulled in by Pest 4.
+- **CI** — composer require --dev for laravel/framework and orchestra/testbench so they are not moved from 
+  equire-dev\ to 
+  equire.
+
+### Links
+
+- [CHANGELOG](https://github.com/gowelle/laravel-route-matrix/blob/v2.0.1/CHANGELOG.md)
+
 ## v2.0.1 - 2026-03-22
 
 ### Fixed
@@ -67,12 +85,16 @@ Seamlessly use your Eloquent models in route requests.
 ##### 🛠️ Quality & Internal Improvements
 
 - **Strict DTOs**: Refactored internal data handling to use strict Data Transfer Objects for `RouteLeg`, `Step`, and `Polyline`, ensuring better type safety.
+  
 - **Enhanced Error Handling**: Added specific exceptions for common API issues:
+  
   - `OverQueryLimitException`
   - `RequestDeniedException`
   
 - **Testing**: Refactored `GoogleRoutesClient` to be fully testable with standard Guzzle `MockHandler`, removing the need for reflection hacks in tests.
+  
 - **Static Analysis**: Codebase now passes Level 5 phpstan checks via `larastan`.
+  
 
 #### 📦 Upgrading
 
@@ -81,11 +103,13 @@ Update your dependency in `composer.json`:
 ```bash
 composer update gowelle/laravel-route-matrix
 
+
 ```
 If you are upgrading from v1.0, publish the configuration file to see new caching options:
 
 ```bash
 php artisan vendor:publish --tag=google-routes-config --force
+
 
 ```
 #### 🧪 Testing
@@ -94,6 +118,7 @@ We've updated our test suite to align with Guzzle's best practices. You can run 
 
 ```bash
 composer test
+
 
 ```
 #### full Change Log
