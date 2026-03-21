@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Gowelle\LaravelRouteMatrix\DataTransferObjects;
 
 use Gowelle\LaravelRouteMatrix\Enums\Maneuver;
+use Gowelle\LaravelRouteMatrix\ValueObjects\LatLng;
 
 /**
  * Represents a step within a route leg.
@@ -16,8 +17,8 @@ final readonly class RouteLegStep
         public ?string $duration = null,
         public ?string $staticDuration = null,
         public ?Polyline $polyline = null,
-        public ?\Gowelle\LaravelRouteMatrix\ValueObjects\LatLng $startLocation = null,
-        public ?\Gowelle\LaravelRouteMatrix\ValueObjects\LatLng $endLocation = null,
+        public ?LatLng $startLocation = null,
+        public ?LatLng $endLocation = null,
         public ?string $instructions = null,
         public ?Maneuver $maneuver = null,
     ) {}
@@ -38,10 +39,10 @@ final readonly class RouteLegStep
             staticDuration: $data['staticDuration'] ?? null,
             polyline: isset($data['polyline']) ? Polyline::fromArray($data['polyline']) : null,
             startLocation: isset($data['startLocation']['latLng'])
-                ? \Gowelle\LaravelRouteMatrix\ValueObjects\LatLng::fromArray($data['startLocation']['latLng'])
+                ? LatLng::fromArray($data['startLocation']['latLng'])
                 : null,
             endLocation: isset($data['endLocation']['latLng'])
-                ? \Gowelle\LaravelRouteMatrix\ValueObjects\LatLng::fromArray($data['endLocation']['latLng'])
+                ? LatLng::fromArray($data['endLocation']['latLng'])
                 : null,
             instructions: $data['navigationInstruction']['instructions'] ?? null,
             maneuver: $maneuver,

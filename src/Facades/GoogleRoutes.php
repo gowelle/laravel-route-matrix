@@ -7,6 +7,7 @@ namespace Gowelle\LaravelRouteMatrix\Facades;
 use Gowelle\LaravelRouteMatrix\Contracts\GoogleRoutesClientInterface;
 use Gowelle\LaravelRouteMatrix\DataTransferObjects\RouteMatrixResponse;
 use Gowelle\LaravelRouteMatrix\DataTransferObjects\RoutesResponse;
+use Gowelle\LaravelRouteMatrix\GoogleRoutesClient;
 use Gowelle\LaravelRouteMatrix\RouteMatrixRequest;
 use Gowelle\LaravelRouteMatrix\RouteRequest;
 use Illuminate\Support\Facades\Facade;
@@ -18,7 +19,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static RouteMatrixResponse computeRouteMatrix(RouteMatrixRequest $request)
  * @method static string|null getApiKey()
  *
- * @see \Gowelle\LaravelRouteMatrix\GoogleRoutesClient
+ * @see GoogleRoutesClient
  */
 class GoogleRoutes extends Facade
 {

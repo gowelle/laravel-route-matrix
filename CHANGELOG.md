@@ -2,6 +2,23 @@
 
 All notable changes to `laravel-route-matrix` will be documented in this file.
 
+## v2.0.0 - 2026-03-22
+
+### Breaking changes
+
+- **PHP**: Minimum version is now **8.3** (was 8.2).
+- **Laravel**: Supports **11.x, 12.x, and 13.x** only; support for **Laravel 10** has been removed.
+
+### Changed
+
+- **CI**: Tests run on PHP **8.3, 8.4, and 8.5** against Laravel 11–13 (Orchestra Testbench 9–11).
+- **Development tooling**: Pest 3, Larastan 3, PHPUnit 11 schema, Laravel Pint updates (code style normalization).
+
+### Migration
+
+- Upgrade your application to **PHP 8.3+** and **Laravel 11+** before installing this version.
+- If you must remain on Laravel 10 or PHP 8.2, continue using **v1.x** of this package.
+
 ## v1.2.0 - 2026-01-15
 
 ### Release v1.2.0

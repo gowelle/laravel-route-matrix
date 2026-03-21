@@ -16,9 +16,11 @@ use Gowelle\LaravelRouteMatrix\Exceptions\OverQueryLimitException;
 use Gowelle\LaravelRouteMatrix\Exceptions\RequestDeniedException;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
+use Illuminate\Contracts\Cache\Repository;
 
 /**
  * Client for interacting with the Google Routes API.
@@ -33,7 +35,7 @@ class GoogleRoutesClient implements GoogleRoutesClientInterface
 
     private int $timeout;
 
-    private ?\Illuminate\Contracts\Cache\Repository $cache;
+    private ?Repository $cache;
 
     /**
      * Create a new GoogleRoutesClient instance.
@@ -44,7 +46,7 @@ class GoogleRoutesClient implements GoogleRoutesClientInterface
         ?int $timeout = null,
         ?Client $httpClient = null,
         int $maxRetries = 3,
-        ?\Illuminate\Contracts\Cache\Repository $cache = null,
+        ?Repository $cache = null,
         array $middleware = [],
         ?callable $handler = null,
     ) {
@@ -94,7 +96,7 @@ class GoogleRoutesClient implements GoogleRoutesClientInterface
             }
 
             // Retry on connection exceptions (timeout, DNS, etc.)
-            if ($exception instanceof \GuzzleHttp\Exception\ConnectException) {
+            if ($exception instanceof ConnectException) {
                 return true;
             }
 

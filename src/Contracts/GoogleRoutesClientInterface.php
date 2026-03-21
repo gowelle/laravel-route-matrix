@@ -6,6 +6,7 @@ namespace Gowelle\LaravelRouteMatrix\Contracts;
 
 use Gowelle\LaravelRouteMatrix\DataTransferObjects\RouteMatrixResponse;
 use Gowelle\LaravelRouteMatrix\DataTransferObjects\RoutesResponse;
+use Gowelle\LaravelRouteMatrix\Exceptions\GoogleRoutesException;
 use Gowelle\LaravelRouteMatrix\RouteMatrixRequest;
 use Gowelle\LaravelRouteMatrix\RouteRequest;
 
@@ -17,14 +18,14 @@ interface GoogleRoutesClientInterface
     /**
      * Compute routes based on the given request.
      *
-     * @throws \Gowelle\LaravelRouteMatrix\Exceptions\GoogleRoutesException
+     * @throws GoogleRoutesException
      */
     public function computeRoutes(RouteRequest $request): RoutesResponse;
 
     /**
      * Compute a route matrix based on the given request.
      *
-     * @throws \Gowelle\LaravelRouteMatrix\Exceptions\GoogleRoutesException
+     * @throws GoogleRoutesException
      */
     public function computeRouteMatrix(RouteMatrixRequest $request): RouteMatrixResponse;
 

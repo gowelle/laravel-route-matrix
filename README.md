@@ -43,8 +43,8 @@ A Laravel wrapper for the [Google Routes API](https://developers.google.com/maps
 
 ## Requirements
 
-- PHP 8.2+
-- Laravel 10.x, 11.x, or 12.x
+- PHP 8.3+
+- Laravel 11.x, 12.x, or 13.x
 - Google Cloud API key with Routes API enabled
 
 ## Installation

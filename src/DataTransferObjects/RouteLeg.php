@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Gowelle\LaravelRouteMatrix\DataTransferObjects;
 
+use Gowelle\LaravelRouteMatrix\ValueObjects\LatLng;
 use Illuminate\Support\Collection;
 
 /**
@@ -19,8 +20,8 @@ final readonly class RouteLeg
         public ?string $duration = null,
         public ?string $staticDuration = null,
         public ?Polyline $polyline = null,
-        public ?\Gowelle\LaravelRouteMatrix\ValueObjects\LatLng $startLocation = null,
-        public ?\Gowelle\LaravelRouteMatrix\ValueObjects\LatLng $endLocation = null,
+        public ?LatLng $startLocation = null,
+        public ?LatLng $endLocation = null,
         public Collection $steps = new Collection,
     ) {}
 
@@ -38,10 +39,10 @@ final readonly class RouteLeg
             staticDuration: $data['staticDuration'] ?? null,
             polyline: isset($data['polyline']) ? Polyline::fromArray($data['polyline']) : null,
             startLocation: isset($data['startLocation']['latLng'])
-                ? \Gowelle\LaravelRouteMatrix\ValueObjects\LatLng::fromArray($data['startLocation']['latLng'])
+                ? LatLng::fromArray($data['startLocation']['latLng'])
                 : null,
             endLocation: isset($data['endLocation']['latLng'])
-                ? \Gowelle\LaravelRouteMatrix\ValueObjects\LatLng::fromArray($data['endLocation']['latLng'])
+                ? LatLng::fromArray($data['endLocation']['latLng'])
                 : null,
             steps: $steps,
         );

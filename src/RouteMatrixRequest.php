@@ -366,11 +366,11 @@ class RouteMatrixRequest
         }
 
         if ($this->departureTime !== null) {
-            $data['departureTime'] = $this->departureTime->format(\DateTimeInterface::RFC3339);
+            $data['departureTime'] = $this->departureTime->format(DateTimeInterface::RFC3339);
         }
 
         if ($this->arrivalTime !== null) {
-            $data['arrivalTime'] = $this->arrivalTime->format(\DateTimeInterface::RFC3339);
+            $data['arrivalTime'] = $this->arrivalTime->format(DateTimeInterface::RFC3339);
         }
 
         if ($this->languageCode !== null) {

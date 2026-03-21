@@ -2,6 +2,7 @@
 
 namespace Gowelle\LaravelRouteMatrix\Tests;
 
+use Gowelle\LaravelRouteMatrix\Exceptions\GoogleRoutesException;
 use Gowelle\LaravelRouteMatrix\GoogleRoutesClient;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Handler\MockHandler;
@@ -95,7 +96,7 @@ class ResiliencyTest extends TestCase
             maxRetries: 3
         );
 
-        $this->expectException(\Gowelle\LaravelRouteMatrix\Exceptions\GoogleRoutesException::class);
+        $this->expectException(GoogleRoutesException::class);
 
         $client->from('Origin')->to('Dest')->get();
     }

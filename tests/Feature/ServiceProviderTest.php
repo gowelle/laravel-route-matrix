@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Gowelle\LaravelRouteMatrix\Contracts\GoogleRoutesClientInterface;
+use Gowelle\LaravelRouteMatrix\Facades\GoogleRoutes;
 use Gowelle\LaravelRouteMatrix\GoogleRoutesClient;
 use Gowelle\LaravelRouteMatrix\GoogleRoutesServiceProvider;
 use Gowelle\LaravelRouteMatrix\Tests\TestCase;
@@ -77,7 +78,7 @@ describe('ServiceProvider', function () {
 
 describe('Facade', function () {
     it('resolves through facade', function () {
-        $client = \Gowelle\LaravelRouteMatrix\Facades\GoogleRoutes::getFacadeRoot();
+        $client = GoogleRoutes::getFacadeRoot();
 
         expect($client)->toBeInstanceOf(GoogleRoutesClient::class);
     });
